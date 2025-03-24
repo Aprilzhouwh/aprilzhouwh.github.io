@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微博 - 随时随地发现新鲜事</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+        
+        body {
+            background-color: #f2f2f2;
+            color: #333;
+            padding-bottom: 50px;
+        }
+        
+        a {
+            text-decoration: none;
+            color: #eb7350;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+        }
+        
+        /* 顶部导航 */
+        .top-nav {
+            height: 50px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e6e6e6;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            height: 100%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+        
+        .logo {
+            width: 40px;
+            height: 40px;
+            background-color: #ff8200;
+            border-radius: 50%;
+            margin-right: 20px;
+        }
+        
+        .nav-items {
+            display: flex;
+            height: 100%;
+        }
+        
+        .nav-item {
+            padding: 0 15px;
+            line-height: 50px;
+            font-size: 15px;
+            color: #333;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .nav-item.active {
+            font-weight: bold;
+            color: #ff8200;
+        }
+        
+        .nav-item.active:after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background-color: #ff8200;
+            bottom: 0;
+            left: 0;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            padding: 15px;
+        }
+        
+        /* 微博卡片 */
+        .weibo-card {
+            background-color: #fff;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .weibo-header {
+            display: flex;
+            margin-bottom: 12px;
+        }
+        
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .user-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .verified-badge {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: #058ce5;
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            text-align: center;
+            line-height: 16px;
+            margin-left: 5px;
+        }
+        
+        .user-handle {
+            font-size: 14px;
+            color: #939393;
+            margin-top: 3px;
+        }
+        
+        .weibo-content {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            white-space: pre-line;
+        }
+        
+        .weibo-content .alert {
+            color: #f33;
+            font-weight: bold;
+        }
+        
+        .weibo-content .hashtag {
+            color: #0f88eb;
+            cursor: pointer;
+        }
+        
+        .weibo-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        
+        .weibo-footer {
+            display: flex;
+            justify-content: space-between;
+            color: #939393;
+            font-size: 14px;
+            padding-top: 10px;
+            border-top: 1px solid #f2f2f2;
+        }
+        
+        .weibo-time {
+            color: #939393;
+        }
+        
+        .weibo-actions {
+            display: flex;
+        }
+        
+        .action-item {
+            margin-left: 20px;
+            cursor: pointer;
+        }
+        
+        .action-item:hover {
+            color: #ff8200;
+        }
+        
+        /* 右侧内容 */
+        .right-sidebar {
+            width: 300px;
+            padding: 15px;
+        }
+        
+        .sidebar-card {
+            background-color: #fff;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            padding: 16px;
+            position: sticky;
+            top: 65px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        
+        .hot-topics {
+            list-style: none;
+        }
+        
+        .topic-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f2f2f2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .topic-item:last-child {
+            border-bottom: none;
+        }
+        
+        .topic-rank {
+            width: 20px;
+            color: #939393;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .topic-rank.top {
+            color: #f33;
+            font-weight: bold;
+        }
+        
+        .topic-content {
+            flex: 1;
+            padding: 0 10px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .topic-hot {
+            font-size: 12px;
+            color: #939393;
+        }
+        
+        .topic-hot .hot-icon {
+            display: inline-block;
+            background-color: #f33;
+            color: white;
+            border-radius: 2px;
+            padding: 0 3px;
+            margin-right: 3px;
+            font-size: 10px;
+        }
+        
+        .return-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #ff8200;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .return-button:hover {
+            background-color: #e56d00;
+        }
+        
+        .alert-post {
+            border-left: 4px solid #f33;
+        }
+        
+        .correction-post {
+            border-left: 4px solid #f90;
+        }
+        
+        @media (max-width: 992px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .right-sidebar {
+                width: 100%;
+            }
+            
+            .sidebar-card {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="top-nav">
+        <div class="nav-container">
+            <div class="logo"></div>
+            <div class="nav-items">
+                <div class="nav-item active">首页</div>
+                <div class="nav-item">视频</div>
+                <div class="nav-item">发现</div>
+                <div class="nav-item">游戏</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 左侧内容区 -->
+        <div class="main-content" id="weibo-feed">
+            <!-- 微博内容将通过JavaScript动态生成 -->
+        </div>
+        
+        <!-- 右侧内容区 -->
+        <div class="right-sidebar">
+            <div class="sidebar-card">
+                <div class="sidebar-title">微博热搜</div>
+                <ul class="hot-topics">
+                    <li class="topic-item">
+                        <div class="topic-rank top">1</div>
+                        <div class="topic-content">超强台风百合即将登陆</div>
+                        <div class="topic-hot"><span class="hot-icon">爆</span>4821万</div>
+                    </li>
+                    <li class="topic-item">
+                        <div class="topic-rank top">2</div>
+                        <div class="topic-content">好莱坞明星Selena Gomez与Benny Blanco被偶遇</div>
+                        <div class="topic-hot">3652万</div>
+                    </li>
+                    <li class="topic-item">
+                        <div class="topic-rank top">3</div>
+                        <div class="topic-content">巴黎时装周大表姐造型</div>
+                        <div class="topic-hot">2987万</div>
+                    </li>
+                    <li class="topic-item">
+                        <div class="topic-rank">4</div>
+                        <div class="topic-content">台风"百合"红色预警</div>
+                        <div class="topic-hot">2456万</div>
+                    </li>
+                    <li class="topic-item">
+                        <div class="topic-rank">5</div>
+                        <div class="topic-content">台风天气家庭防护指南</div>
+                        <div class="topic-hot">1923万</div>
+                    </li>
+                    <li class="topic-item">
+                        <div class="topic-rank">6</div>
+                        <div class="topic-content">南方多地学校宣布停课</div>
+                        <div class="topic-hot">1754万</div>
+                    </li>
+                    <li class="topic-item">
+                        <div class="topic-rank">7</div>
+                        <div class="topic-content">紧急通知：多地高速关闭</div>
+                        <div class="topic-hot">1632万</div>
+                    </li>
+                    <li class="topic-item">
+                        <div class="topic-rank">8</div>
+                        <div class="topic-content">台风期间囤货指南</div>
+                        <div class="topic-hot">1421万</div>
+                    </li>
+                    <li class="topic-item">
+                        <div class="topic-rank">9</div>
+                        <div class="topic-content">张艺谋新电影定档</div>
+                        <div class="topic-hot">1265万</div>
+                    </li>
+                    <li class="topic-item">
+                        <div class="topic-rank">10</div>
+                        <div class="topic-content">世界杯预选赛中国队名单</div>
+                        <div class="topic-hot">1132万</div>
+                    </li>
+                </ul>
+            </div>
+            
+            <button id="return-button" class="return-button">完成体验，返回问卷</button>
+        </div>
+    </div>
+    
+    <script>
+        // 解析URL参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const sourceType = urlParams.get('source') || 'human'; // human 或 ai
+        const mistakeCondition = urlParams.get('mistake') || 'no'; // yes 或 no
+        const userId = urlParams.get('userId') || 'anonymous';
+        
+        // 用户行为记录
+        let userActions = [];
+        const startTime = new Date();
+        
+        // 微博数据
+        const weiboData = {
+            human: {
+                mainPost: {
+                    id: 'human-alert',
+                    username: '国家气象中心',
+                    userHandle: '@CMA_Weather',
+                    verified: true,
+                    avatar: 'https://i.postimg.cc/wT4PZjbv/IMG-6562.jpg',
+                    content: `🚨 台风红色预警 🚨
+国家气象中心的专家预测，超强台风"百合"预计今晚6点将在广东汕头登陆。预计将带来强风、暴雨和风暴潮。
+
+🔹 请居民待在室内，远离沿海地区
+🔹 加固门窗，妥善安置室外物品
+🔹 密切关注官方消息
+
+#台风预警# #广东天气# #安全第一#`,
+                    // image: 'https://i.imgur.com/zLCa5G8.jpg',
+                    time: '今天 15:07',
+                    forwards: 8732,
+                    comments: 2156,
+                    likes: 4231,
+                    isAlert: true
+                },
+                correctionPost: {
+                    id: 'human-correction',
+                    username: '国家气象中心',
+                    userHandle: '@CMA_Weather',
+                    verified: true,
+                    avatar: 'https://i.postimg.cc/wT4PZjbv/IMG-6562.jpg',
+                    content: `⚠️ 更正声明：台风预警更新 ⚠️
+国家气象中心专家先前错误预测了台风登陆地点。超强台风"百合"实际将于今晚6点在海南海口登陆，而非广东汕头。
+
+🔹 海南海口及周边地区居民注意防范强风、暴雨及洪水
+🔹 居民请待在室内，避免外出
+🔹 请持续关注后续官方指示
+
+对预测错误给您带来的不便，我们深表歉意，敬请谅解并保持安全。
+
+#台风预警# #更正声明# #应急响应#`,
+                    //image: 'https://i.imgur.com/H6MPqrd.jpg',
+                    time: '今天 17:15',
+                    forwards: 12653,
+                    comments: 5421,
+                    likes: 3254,
+                    isCorrection: true
+                }
+            },
+            ai: {
+                mainPost: {
+                    id: 'ai-alert',
+                    username: '国家气象中心AI助手',
+                    userHandle: '@CMA_AI',
+                    verified: true,
+                    avatar: 'https://i.postimg.cc/wT4PZjbv/IMG-6562.jpg',
+                    content: `🚨 台风红色预警 🚨
+国家气象中心AI模型预测，超强台风"百合"预计今晚6点将在广东汕头登陆。预计天气极端恶劣，将出现强风、暴雨和风暴潮。
+
+🔹 请居民待在室内，远离沿海地区
+🔹 加固门窗，妥善安置室外物品
+🔹 密切关注官方消息
+
+#台风预警# #AI天气# #防灾减灾#`,
+                    //image: 'https://i.imgur.com/zLCa5G8.jpg',
+                    time: '今天 15:07',
+                    forwards: 8732,
+                    comments: 2156,
+                    likes: 4231,
+                    isAlert: true
+                },
+                correctionPost: {
+                    id: 'ai-correction',
+                    username: '国家气象中心AI助手',
+                    userHandle: '@CMA_AI',
+                    verified: true,
+                    avatar: 'https://i.postimg.cc/wT4PZjbv/IMG-6562.jpg',
+                    content: `⚠️ 系统更新：台风预警更正 ⚠️
+国家气象中心AI模型此前误报了台风登陆地点。经最新计算，超强台风"百合"将于今晚6点在海南海口登陆，而非广东汕头。
+
+🔹 海南海口及附近地区居民注意严防灾害性天气
+🔹 居民请待在室内，减少不必要的外出
+🔹 请关注后续安全指引
+
+本次更正基于最新系统预测，对误报给您带来的不便表示歉意，请保持警惕。
+
+#台风预警# #AI更正# #防灾预警#`,
+                    //image: 'https://i.imgur.com/H6MPqrd.jpg',
+                    time: '今天 17:15',
+                    forwards: 12653,
+                    comments: 5421,
+                    likes: 3254,
+                    isCorrection: true
+                }
+            }
+        };
+        
+        // 其他微博数据
+        const otherWeibos = [
+            {
+                id: 'gossip-1',
+                username: '娱乐圈爆料君',
+                userHandle: '@娱乐圈爆料君',
+                verified: true,
+                avatar: 'https://i.postimg.cc/d1F1cd3c/IMG-6560.jpg',
+                content: `好莱坞知名艺人Selena Gomez与Benny Blanco疑似被传绯闻后再次偶遇被拍！两人被目击在某高档餐厅共进晚餐，全程有说有笑，气氛暧昧。#娱乐新闻# #好莱坞明星绯闻#`,
+                // image: 'https://imgur.com/a/l5uuO6J',
+                time: '今天 14:23',
+                forwards: 3245,
+                comments: 1876,
+                likes: 5421
+            },
+            {
+                id: 'gossip-2',
+                username: '时尚芭莎',
+                userHandle: '@BAZAAR',
+                verified: true,
+                avatar: 'https://i.postimg.cc/sDB91xhH/IMG-6561.jpg',
+                content: `【巴黎时装周】大表姐刘雯惊艳亮相巴黎时装周，一袭红裙成为全场焦点！网友：气场全开！#巴黎时装周# #时尚前沿# #红毯造型#`,
+                //image: 'https://i.imgur.com/QGw1rJj.jpg',
+                time: '今天 14:45',
+                forwards: 1532,
+                comments: 987,
+                likes: 3254
+            },
+            {
+                id: 'typhoon-1',
+                username: '广东交通',
+                userHandle: '@广东交通',
+                verified: true,
+                avatar: 'https://i.postimg.cc/wxcBbqJb/IMG-6563.jpg',
+                content: `【紧急通知】受台风"百合"影响，今日18:00起，广东省内所有高速公路将实施临时交通管制，具体恢复时间另行通知。请广大司机朋友提前安排行程，注意安全。#交通管制# #台风百合#`,
+                time: '今天 15:32',
+                forwards: 5421,
+                comments: 1245,
+                likes: 876
+            },
+            {
+                id: 'typhoon-2',
+                username: '沿海小王',
+                userHandle: '@沿海小王',
+                verified: false,
+                avatar: 'https://i.postimg.cc/mk7L67n6/IMG-6564.jpg',
+                content: `家里阳台的花盆都搬进来了，门窗也贴好了，超市买了很多泡面和矿泉水，准备好蜡烛和充电宝，就等台风来了！大家都做好准备了吗？#台风来了# #宅家攻略#`,
+                //image: 'https://i.imgur.com/H6MPqrd.jpg',
+                time: '今天 16:10',
+                forwards: 243,
+                comments: 156,
+                likes: 654
+            },
+            {
+                id: 'typhoon-3',
+                username: '中国天气网',
+                userHandle: '@中国天气网',
+                verified: true,
+                avatar: 'https://i.postimg.cc/htNSgyq3/IMG-6567.jpg',
+                content: `【台风"百合"实时路径】截至17:30，台风"百合"已增强为超强台风级别，中心最大风力16级（52米/秒），预计将对华南沿海造成重大影响。请密切关注官方预警信息。#台风路径# #天气预警#`,
+                //image: 'https://i.imgur.com/zLCa5G8.jpg',
+                time: '今天 17:35',
+                forwards: 7865,
+                comments: 2354,
+                likes: 1765
+            },
+            {
+                id: 'typhoon-4',
+                username: '中国应急管理',
+                userHandle: '@应急管理部',
+                verified: true,
+                avatar: 'https://i.postimg.cc/gjW64J1N/IMG-6566.jpg',
+                content: `应急管理部已启动台风灾害Ⅱ级应急响应，调派救援队伍前往可能受灾地区。请广大群众提高警惕，听从当地政府安排，确保人身安全。#应急响应# #防灾减灾#`,
+                time: '今天 17:50',
+                forwards: 4532,
+                comments: 1234,
+                likes: 2345
+            }
+        ];
+        
+        // 根据实验条件生成微博列表
+        function generateWeiboList() {
+            const weibos = [];
+            
+            // 添加前两条八卦微博
+            weibos.push(otherWeibos[0], otherWeibos[1]);
+            
+            // 添加主实验微博
+            weibos.push(weiboData[sourceType].mainPost);
+            
+            // 添加两条台风相关微博
+            weibos.push(otherWeibos[2], otherWeibos[3]);
+            
+            // 如果是错误条件，添加更正微博
+            if (mistakeCondition === 'yes') {
+                weibos.push(weiboData[sourceType].correctionPost);
+            }
+            
+            // 添加最后两条台风相关微博
+            weibos.push(otherWeibos[4], otherWeibos[5]);
+            
+            return weibos;
+        }
+        
+        // 创建微博HTML
+        function createWeiboHTML(weibo) {
+            let weiboClass = 'weibo-card';
+            if (weibo.isAlert) weiboClass += ' alert-post';
+            if (weibo.isCorrection) weiboClass += ' correction-post';
+            
+            let contentHTML = weibo.content
+                .replace(/#([^#]+)#/g, '<span class="hashtag">#$1#</span>')
+                .replace(/🚨/g, '<span class="alert">🚨</span>')
+                .replace(/⚠️/g, '<span class="alert">⚠️</span>');
+            
+            let imageHTML = weibo.image ? `<img src="${weibo.image}" alt="微博图片" class="weibo-image">` : '';
+            
+            return `
+            <div class="${weiboClass}" data-id="${weibo.id}">
+                <div class="weibo-header">
+                    <img src="${weibo.avatar}" alt="${weibo.username}" class="avatar">
+                    <div class="user-info">
+                        <div class="user-name">${weibo.username} ${weibo.verified ? '<span class="verified-badge">V</span>' : ''}</div>
+                        <div class="user-handle">${weibo.userHandle}</div>
+                    </div>
+                </div>
+                <div class="weibo-content">${contentHTML}</div>
+                ${imageHTML}
+                <div class="weibo-footer">
+                    <div class="weibo-time">${weibo.time}</div>
+                    <div class="weibo-actions">
+                        <div class="action-item" data-action="forward" data-id="${weibo.id}">转发 ${weibo.forwards || ''}</div>
+                        <div class="action-item" data-action="comment" data-id="${weibo.id}">评论 ${weibo.comments || ''}</div>
+                        <div class="action-item" data-action="like" data-id="${weibo.id}">点赞 ${weibo.likes || ''}</div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+        
+        // 渲染微博列表
+        function renderWeiboFeed() {
+            const weiboFeed = document.getElementById('weibo-feed');
+            const weibos = generateWeiboList();
+            
+            weiboFeed.innerHTML = '';
+            weibos.forEach(weibo => {
+                weiboFeed.innerHTML += createWeiboHTML(weibo);
+            });
+            
+            // 添加交互事件
+            document.querySelectorAll('.action-item').forEach(item => {
+                item.addEventListener('click', handleAction);
+            });
+            
+            document.querySelectorAll('.hashtag').forEach(tag => {
+                tag.addEventListener('click', () => {
+                    logAction('hashtag_click', tag.textContent);
+                });
+            });
+        }
+        
+        // 处理用户交互
+        function handleAction(event) {
+            const actionType = event.currentTarget.dataset.action;
+            const weiboId = event.currentTarget.dataset.id;
+            
+            // 记录用户行为
+            logAction(actionType, weiboId);
+            
+            // 视觉反馈
+            if (actionType === 'like') {
+                event.currentTarget.style.color = '#ff8200';
+                const countText = event.currentTarget.textContent;
+                const count = parseInt(countText.replace(/[^0-9]/g, '')) || 0;
+                event.currentTarget.textContent = `点赞 ${count + 1}`;
+            } else if (actionType === 'comment') {
+                const comment = prompt('请输入您的评论:');
+                if (comment && comment.trim()) {
+                    logAction('comment_content', weiboId, comment);
+                    alert('评论已提交！');
+                }
+            } else if (actionType === 'forward') {
+                const forward = prompt('转发微博，您想说点什么?');
+                if (forward !== null) {
+                    logAction('forward_content', weiboId, forward || '转发微博');
+                    event.currentTarget.style.color = '#ff8200';
+                    const countText = event.currentTarget.textContent;
+                    const count = parseInt(countText.replace(/[^0-9]/g, '')) || 0;
+                    event.currentTarget.textContent = `转发 ${count + 1}`;
+                }
+            }
+        }
+        
+        // 记录用户行为
+        function logAction(action, targetId, content = null) {
+            const actionData = {
+                userId: userId,
+                source: sourceType,
+                mistake: mistakeCondition,
+                action,
+                targetId,
+                content,
+                timestamp: new Date().toISOString()
+            };
+            
+            userActions.push(actionData);
+            
+            // 保存到localStorage
+            localStorage.setItem('weiboExperimentActions', JSON.stringify(userActions));
+            console.log('用户行为记录:', actionData);
+        }
+        
+        // 返回问卷函数
+        function returnToSurvey() {
+            // 将收集的所有数据整合
+            const allData = {
+                userId: userId,
+                source: sourceType,
+                mistake: mistakeCondition,
+                actions: userActions,
+                startTime: startTime.toISOString(),
+                endTime: new Date().toISOString()
+            };
+            
+            // 保存完整数据到localStorage
+            localStorage.setItem('weiboExperimentComplete', JSON.stringify(allData));
+            
+            // 构建返回URL
+            let returnUrl = urlParams.get('returnUrl');
+            
+            if (returnUrl) {
+                // 添加数据摘要作为URL参数返回给Credemo
+                returnUrl += `&completed=true&source=${sourceType}&mistake=${mistakeCondition}`;
+                returnUrl += `&actions=${userActions.length}`;
+                returnUrl += `&duration=${Math.round((new Date() - startTime) / 1000)}`;
+                
+                // 跳转回问卷
+                window.location.href = returnUrl;
+            } else {
+                alert("实验完成！您的行为数据已记录。");
+                console.log("完整数据:", allData);
+            }
+        }
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            renderWeiboFeed();
+            
+            // 添加返回按钮事件
+            document.getElementById('return-button').addEventListener('click', returnToSurvey);
+            
+            // 记录页面加载事件
+            logAction('page_loaded', 'feed');
+        });
+    </script>
+</body>
+</html>
