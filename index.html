@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>微博 - 随时随地发现新鲜事</title>
+    <title>微博 - 台风百合预警</title>
     <style>
         * {
             margin: 0;
@@ -396,47 +396,23 @@
     </div>
     
     <script>
-        // 解析URL参数
+        // 解析URL参数决定显示哪个组
         const urlParams = new URLSearchParams(window.location.search);
-        const sourceType = urlParams.get('source') || 'human'; // human 或 ai
-        const mistakeCondition = urlParams.get('mistake') || 'no'; // yes 或 no
-        const userId = urlParams.get('userId') || 'anonymous';
+        const groupType = urlParams.get('group') || 'normal'; // 可选值: human-mistake, ai-mistake, random
         
-        // 用户行为记录
-        let userActions = [];
-        const startTime = new Date();
+        // 获取微博容器
+        const weiboFeed = document.getElementById('weibo-feed');
         
-        // 微博数据
+        // 微博数据 - 实验材料
         const weiboData = {
-            human: {
-                mainPost: {
-                    id: 'human-alert',
-                    username: '国家气象中心',
-                    userHandle: '@CMA_Weather',
-                    verified: true,
-                    avatar: 'https://i.postimg.cc/wT4PZjbv/IMG-6562.jpg',
-                    content: `🚨 台风红色预警 🚨
-国家气象中心的专家预测，超强台风"百合"预计今晚6点将在广东汕头登陆。预计将带来强风、暴雨和风暴潮。
-
-🔹 请居民待在室内，远离沿海地区
-🔹 加固门窗，妥善安置室外物品
-🔹 密切关注官方消息
-
-#台风预警# #广东天气# #安全第一#`,
-                    // image: 'https://i.imgur.com/zLCa5G8.jpg',
-                    time: '今天 15:07',
-                    forwards: 8732,
-                    comments: 2156,
-                    likes: 4231,
-                    isAlert: true
-                },
-                correctionPost: {
-                    id: 'human-correction',
-                    username: '国家气象中心',
-                    userHandle: '@CMA_Weather',
-                    verified: true,
-                    avatar: 'https://i.postimg.cc/wT4PZjbv/IMG-6562.jpg',
-                    content: `⚠️ 更正声明：台风预警更新 ⚠️
+            // 人类来源的更正微博
+            humanCorrection: {
+                id: 'human-correction',
+                username: '国家气象中心',
+                userHandle: '@CMA_Weather',
+                verified: true,
+                avatar: 'https://i.postimg.cc/Sx8gZx34/IMG-6562.jpg',
+                content: `⚠️ 更正声明：台风预警更新 ⚠️
 国家气象中心专家先前错误预测了台风登陆地点。超强台风"百合"实际将于今晚6点在海南海口登陆，而非广东汕头。
 
 🔹 海南海口及周边地区居民注意防范强风、暴雨及洪水
@@ -446,43 +422,22 @@
 对预测错误给您带来的不便，我们深表歉意，敬请谅解并保持安全。
 
 #台风预警# #更正声明# #应急响应#`,
-                    //image: 'https://i.imgur.com/H6MPqrd.jpg',
-                    time: '今天 17:15',
-                    forwards: 12653,
-                    comments: 5421,
-                    likes: 3254,
-                    isCorrection: true
-                }
+                // image: 'https://i.postimg.cc/Sx8gZx34/IMG-6562.jpg',
+                time: '今天 17:15',
+                forwards: 12653,
+                comments: 5421,
+                likes: 3254,
+                isCorrection: true
             },
-            ai: {
-                mainPost: {
-                    id: 'ai-alert',
-                    username: '国家气象中心AI助手',
-                    userHandle: '@CMA_AI',
-                    verified: true,
-                    avatar: 'https://i.postimg.cc/wT4PZjbv/IMG-6562.jpg',
-                    content: `🚨 台风红色预警 🚨
-国家气象中心AI模型预测，超强台风"百合"预计今晚6点将在广东汕头登陆。预计天气极端恶劣，将出现强风、暴雨和风暴潮。
-
-🔹 请居民待在室内，远离沿海地区
-🔹 加固门窗，妥善安置室外物品
-🔹 密切关注官方消息
-
-#台风预警# #AI天气# #防灾减灾#`,
-                    //image: 'https://i.imgur.com/zLCa5G8.jpg',
-                    time: '今天 15:07',
-                    forwards: 8732,
-                    comments: 2156,
-                    likes: 4231,
-                    isAlert: true
-                },
-                correctionPost: {
-                    id: 'ai-correction',
-                    username: '国家气象中心AI助手',
-                    userHandle: '@CMA_AI',
-                    verified: true,
-                    avatar: 'https://i.postimg.cc/wT4PZjbv/IMG-6562.jpg',
-                    content: `⚠️ 系统更新：台风预警更正 ⚠️
+            
+            // AI来源的更正微博
+            aiCorrection: {
+                id: 'ai-correction',
+                username: '国家气象中心AI助手',
+                userHandle: '@CMA_AI',
+                verified: true,
+                avatar: 'https://i.postimg.cc/Sx8gZx34/IMG-6562.jpg',
+                content: `⚠️ 系统更新：台风预警更正 ⚠️
 国家气象中心AI模型此前误报了台风登陆地点。经最新计算，超强台风"百合"将于今晚6点在海南海口登陆，而非广东汕头。
 
 🔹 海南海口及附近地区居民注意严防灾害性天气
@@ -492,273 +447,287 @@
 本次更正基于最新系统预测，对误报给您带来的不便表示歉意，请保持警惕。
 
 #台风预警# #AI更正# #防灾预警#`,
-                    //image: 'https://i.imgur.com/H6MPqrd.jpg',
-                    time: '今天 17:15',
-                    forwards: 12653,
-                    comments: 5421,
-                    likes: 3254,
-                    isCorrection: true
-                }
+                // image: 'https://pic3.zhimg.com/v2-c6fc8369b63ee0e02b2fe3da3bed8b55_r.jpg',
+                time: '今天 17:15',
+                forwards: 12653,
+                comments: 5421,
+                likes: 3254,
+                isCorrection: true
             }
         };
-        
-        // 其他微博数据
-        const otherWeibos = [
+            
+        // 随机微博数据
+        const otherWeibosGroup2 = [
             {
-                id: 'gossip-1',
-                username: '娱乐圈爆料君',
-                userHandle: '@娱乐圈爆料君',
+                id: 'typhoon-5',
+                username: '广东气象',
+                userHandle: '@广东气象',
                 verified: true,
-                avatar: 'https://i.postimg.cc/d1F1cd3c/IMG-6560.jpg',
-                content: `好莱坞知名艺人Selena Gomez与Benny Blanco疑似被传绯闻后再次偶遇被拍！两人被目击在某高档餐厅共进晚餐，全程有说有笑，气氛暧昧。#娱乐新闻# #好莱坞明星绯闻#`,
-                // image: 'https://imgur.com/a/l5uuO6J',
-                time: '今天 14:23',
-                forwards: 3245,
-                comments: 1876,
-                likes: 5421
+                avatar: 'https://i.postimg.cc/GhDPRSQJ/IMG-6584.jpg',
+                content: `【台风"百合"最新动态】台风"百合"将给海南海口带来大风大雨天气，沿海地区风力可达12级以上。各地已启动防台风应急响应，请广大市民严格遵守当地防台风规定，确保安全。#台风百合# #防台风#`,
+                // image: 'https://pic2.zhimg.com/v2-da8ceedf5e48e0eccbf991207d7059db_r.jpg',
+                time: '今天 15:15',
+                forwards: 6543,
+                comments: 1987,
+                likes: 2345
             },
             {
-                id: 'gossip-2',
-                username: '时尚芭莎',
-                userHandle: '@BAZAAR',
+                id: 'typhoon-6',
+                username: '南方日报',
+                userHandle: '@南方日报',
                 verified: true,
-                avatar: 'https://i.postimg.cc/sDB91xhH/IMG-6561.jpg',
-                content: `【巴黎时装周】大表姐刘雯惊艳亮相巴黎时装周，一袭红裙成为全场焦点！网友：气场全开！#巴黎时装周# #时尚前沿# #红毯造型#`,
-                //image: 'https://i.imgur.com/QGw1rJj.jpg',
-                time: '今天 14:45',
-                forwards: 1532,
-                comments: 987,
-                likes: 3254
+                avatar: 'https://i.postimg.cc/h42GpLsF/IMG-6585.jpg',
+                content: `【台风期间安全提示】台风"百合"即将来袭，请市民：1.关好门窗，加固室外物品；2.储备食物和饮用水；3.准备手电筒等照明设备；4.充好手机，备用充电宝；5.关注官方信息，不信谣不传谣。#防台风指南#`,
+                time: '今天 15:45',
+                forwards: 4321,
+                comments: 1234,
+                likes: 3456
             },
             {
-                id: 'typhoon-1',
-                username: '广东交通',
-                userHandle: '@广东交通',
+                id: 'typhoon-7',
+                username: '海南发布',
+                userHandle: '@海南发布',
                 verified: true,
-                avatar: 'https://i.postimg.cc/wxcBbqJb/IMG-6563.jpg',
-                content: `【紧急通知】受台风"百合"影响，今日18:00起，广东省内所有高速公路将实施临时交通管制，具体恢复时间另行通知。请广大司机朋友提前安排行程，注意安全。#交通管制# #台风百合#`,
-                time: '今天 15:32',
-                forwards: 5421,
-                comments: 1245,
-                likes: 876
+                avatar: 'https://i.postimg.cc/K8nZpjP1/IMG-6586.jpg',
+                content: `【海南省启动防台风Ⅰ级应急响应】根据气象部门预报，台风"百合"可能于今晚在我省登陆。全省各级各部门要全力做好防台风各项工作，确保人民群众生命安全。#台风百合# #应急响应#`,
+                time: '今天 16:20',
+                forwards: 5678,
+                comments: 2345,
+                likes: 3456
             },
             {
-                id: 'typhoon-2',
-                username: '沿海小王',
-                userHandle: '@沿海小王',
-                verified: false,
-                avatar: 'https://i.postimg.cc/mk7L67n6/IMG-6564.jpg',
-                content: `家里阳台的花盆都搬进来了，门窗也贴好了，超市买了很多泡面和矿泉水，准备好蜡烛和充电宝，就等台风来了！大家都做好准备了吗？#台风来了# #宅家攻略#`,
-                //image: 'https://i.imgur.com/H6MPqrd.jpg',
-                time: '今天 16:10',
-                forwards: 243,
-                comments: 156,
-                likes: 654
-            },
-            {
-                id: 'typhoon-3',
-                username: '中国天气网',
-                userHandle: '@中国天气网',
+                id: 'typhoon-8',
+                username: '广州地铁',
+                userHandle: '@广州地铁',
                 verified: true,
-                avatar: 'https://i.postimg.cc/htNSgyq3/IMG-6567.jpg',
-                content: `【台风"百合"实时路径】截至17:30，台风"百合"已增强为超强台风级别，中心最大风力16级（52米/秒），预计将对华南沿海造成重大影响。请密切关注官方预警信息。#台风路径# #天气预警#`,
-                //image: 'https://i.imgur.com/zLCa5G8.jpg',
-                time: '今天 17:35',
-                forwards: 7865,
-                comments: 2354,
-                likes: 1765
-            },
-            {
-                id: 'typhoon-4',
-                username: '中国应急管理',
-                userHandle: '@应急管理部',
-                verified: true,
-                avatar: 'https://i.postimg.cc/gjW64J1N/IMG-6566.jpg',
-                content: `应急管理部已启动台风灾害Ⅱ级应急响应，调派救援队伍前往可能受灾地区。请广大群众提高警惕，听从当地政府安排，确保人身安全。#应急响应# #防灾减灾#`,
-                time: '今天 17:50',
-                forwards: 4532,
+                avatar: 'https://i.postimg.cc/DyDwK7RB/IMG-6587.jpg',
+                content: `【地铁运营调整通知】受台风"百合"影响，今日18:00起，我司将视天气情况可能临时调整部分线路运营计划。请乘客留意车站公告和官方微博信息，提前安排行程。#广州地铁# #台风应急#`,
+                time: '今天 16:45',
+                forwards: 3456,
                 comments: 1234,
                 likes: 2345
+            },
+            {
+                id: 'typhoon-9',
+                username: '海事局',
+                userHandle: '@中国海事',
+                verified: true,
+                avatar: 'https://i.postimg.cc/nzHH1rQc/IMG-6588.jpg',
+                content: `【航行警告】受台风"百合"影响，广东等沿海水域已发布航行警告，禁止船舶出海作业。已在海上的船舶应尽快回港避风或驶离危险海域。#海上安全# #防台风#`,
+                time: '今天 17:05',
+                forwards: 4567,
+                comments: 1234,
+                likes: 2345
+            },
+            {
+                id: 'typhoon-10',
+                username: '气象爱好者',
+                userHandle: '@台风追踪',
+                verified: false,
+                avatar: 'https://i.postimg.cc/7L4Dxh9M/IMG-6589.jpg',
+                content: `根据卫星云图分析，台风"百合"强度仍在增强，中心气压已降至940百帕，属于超强台风级别。按目前路径，登陆后将快速减弱，但影响范围广泛，需高度警惕。#台风分析# #气象爱好者#`,
+                // image: 'https://pic2.zhimg.com/v2-da8ceedf5e48e0eccbf991207d7059db_r.jpg',
+                time: '今天 17:30',
+                forwards: 2345,
+                comments: 1234,
+                likes: 3456
+            },
+            {
+                id: 'typhoon-11',
+                username: '南方电网',
+                userHandle: '@南方电网',
+                verified: true,
+                avatar: 'https://i.postimg.cc/J75Zv38L/IMG-6591.jpg',
+                content: `【电力保障通知】南方电网已启动防台风Ⅱ级应急响应，抢修人员24小时待命。如遇停电，请拨打95598报修。提醒大家：台风期间远离户外电力设施，注意用电安全。#电力保障# #防台风#`,
+                time: '今天 18:05',
+                forwards: 3456,
+                comments: 987,
+                likes: 1432
             }
         ];
-        
-        // 根据实验条件生成微博列表
-        function generateWeiboList() {
-            const weibos = [];
-            
-            // 添加前两条八卦微博
-            weibos.push(otherWeibos[0], otherWeibos[1]);
-            
-            // 添加主实验微博
-            weibos.push(weiboData[sourceType].mainPost);
-            
-            // 添加两条台风相关微博
-            weibos.push(otherWeibos[2], otherWeibos[3]);
-            
-            // 如果是错误条件，添加更正微博
-            if (mistakeCondition === 'yes') {
-                weibos.push(weiboData[sourceType].correctionPost);
+
+        const randomGroupWeibos = otherWeibosGroup2.map(weibo => {
+             // 创建微博对象的深拷贝
+            const modifiedWeibo = JSON.parse(JSON.stringify(weibo));
+            // 替换所有可能提到海南海口的内容为广东汕头
+            if (modifiedWeibo.content) {
+                modifiedWeibo.content = modifiedWeibo.content
+                    .replace(/海南海口/g, "广东汕头")
+                    .replace(/海南省/g, "广东省")
+                    .replace(/海南/g, "广东")
+                    .replace(/我省/g, "广东省")
+                    .replace(/海口/g, "汕头");
             }
+
+            return modifiedWeibo;
+
+        });
+        
+        // 定义微博数据和函数
+        function loadExperimentGroup() {
+            // 清空容器
+            weiboFeed.innerHTML = '';
             
-            // 添加最后两条台风相关微博
-            weibos.push(otherWeibos[4], otherWeibos[5]);
-            
-            return weibos;
+            // 根据组别加载不同内容
+            switch(groupType) {
+                case 'human-mistake': // 第3组: Human来源+错误更正
+                    loadHumanMistakeGroup();
+                    break;
+                case 'AI-mistake': // 第4组: AI来源+错误更正
+                    loadAIMistakeGroup();
+                    break;
+                case 'random': // 第5组: 全随机内容
+                    loadRandomGroup();
+                    break;
+                default:
+                    // 默认加载随机组
+                    loadRandomGroup();
+            }
         }
         
-        // 创建微博HTML
-        function createWeiboHTML(weibo) {
-            let weiboClass = 'weibo-card';
-            if (weibo.isAlert) weiboClass += ' alert-post';
-            if (weibo.isCorrection) weiboClass += ' correction-post';
+        function isOfficialAccount(username) {
+            const officialAccounts = [
+                '广东气象', '南方日报', '海南发布', '广州地铁', 
+                '海事局', '中国天气网', '中国应急管理', 
+                '央视新闻', '南方电网'
+            ];
+    
+            return officialAccounts.includes(username);
+        }
+        
+        // 第3组: Human来源+更正(更正帖在第1位)
+        //function loadHumanMistakeGroup() {
+            // 首先添加人类更正微博
+            //addWeibo(weiboData.humanCorrection);
             
-            let contentHTML = weibo.content
-                .replace(/#([^#]+)#/g, '<span class="hashtag">#$1#</span>')
-                .replace(/🚨/g, '<span class="alert">🚨</span>')
-                .replace(/⚠️/g, '<span class="alert">⚠️</span>');
+            // 然后添加剩余随机微博
+            //shuffleArray(otherWeibosGroup2).forEach(weibo => {
+                //addWeibo(weibo);
+            //});
+        //}
+        //第三组更新内容：
+        function loadHumanMistakeGroup() {
+            addWeibo(weiboData.humanCorrection); 
+            otherWeibosGroup2.forEach(weibo => {
+                addWeibo(weibo);
+            });
+        }
+
+
+        
+        // 第4组: AI来源+更正(更正帖在第1位)
+        //function loadAIMistakeGroup() {
+            // 首先添加AI更正微博
+            //addWeibo(weiboData.aiCorrection);
             
-            let imageHTML = weibo.image ? `<img src="${weibo.image}" alt="微博图片" class="weibo-image">` : '';
+            // 然后添加剩余随机微博
+            //shuffleArray(otherWeibosGroup2).forEach(weibo => {
+                //addWeibo(weibo);
+            //});
+        //}
+        // 第四组更新后内容：
+        function loadAIMistakeGroup() {
+            addWeibo(weiboData.aiCorrection);
+
+            // 创建微博数组副本，以便修改而不影响原始数据
+            const modifiedWeibos = otherWeibosGroup2.map(weibo => {
+                // 创建微博对象的深拷贝
+                const modifiedWeibo = JSON.parse(JSON.stringify(weibo));
+
+                // 检查是否是官方账号
+                if (isOfficialAccount(modifiedWeibo.username)) {
+                    modifiedWeibo.username += ' AI助手';
+                }
+        
+                return modifiedWeibo;
+            });
+
+            // 添加修改后的微博
+            modifiedWeibos.forEach(weibo => {
+                addWeibo(weibo);
+            });
+        }
             
-            return `
-            <div class="${weiboClass}" data-id="${weibo.id}">
+
+        // 第5组: 全随机内容
+        //function loadRandomGroup() {
+            // 添加所有随机微博(无实验材料)
+            //shuffleArray(otherWeibosGroup2).forEach(weibo => {
+                //addWeibo(weibo);
+            //});
+        //}
+
+        //第五组更新后内容：
+        function loadRandomGroup() {
+            randomGroupWeibos.forEach(weibo => {
+                addWeibo(weibo);
+            });
+        }
+
+        // 生成微博HTML的函数
+        function addWeibo(weibo) {
+            const weiboElement = document.createElement('div');
+            weiboElement.className = 'weibo-card';
+            if (weibo.isAlert) {
+                weiboElement.classList.add('alert-post');
+            }
+            if (weibo.isCorrection) {
+                weiboElement.classList.add('correction-post');
+            }
+            
+            let weiboHTML = `
                 <div class="weibo-header">
                     <img src="${weibo.avatar}" alt="${weibo.username}" class="avatar">
                     <div class="user-info">
-                        <div class="user-name">${weibo.username} ${weibo.verified ? '<span class="verified-badge">V</span>' : ''}</div>
+                        <div class="user-name">
+                            ${weibo.username}
+                            ${weibo.verified ? '<span class="verified-badge">V</span>' : ''}
+                        </div>
                         <div class="user-handle">${weibo.userHandle}</div>
                     </div>
                 </div>
-                <div class="weibo-content">${contentHTML}</div>
-                ${imageHTML}
+                <div class="weibo-content">${weibo.content}</div>
+            `;
+            
+            if (weibo.image) {
+                weiboHTML += `<img src="${weibo.image}" alt="微博图片" class="weibo-image">`;
+            }
+            
+            weiboHTML += `
                 <div class="weibo-footer">
                     <div class="weibo-time">${weibo.time}</div>
                     <div class="weibo-actions">
-                        <div class="action-item" data-action="forward" data-id="${weibo.id}">转发 ${weibo.forwards || ''}</div>
-                        <div class="action-item" data-action="comment" data-id="${weibo.id}">评论 ${weibo.comments || ''}</div>
-                        <div class="action-item" data-action="like" data-id="${weibo.id}">点赞 ${weibo.likes || ''}</div>
+                        <span class="action-item">转发 ${weibo.forwards || 0}</span>
+                        <span class="action-item">评论 ${weibo.comments || 0}</span>
+                        <span class="action-item">点赞 ${weibo.likes || 0}</span>
                     </div>
                 </div>
-            </div>
             `;
+            
+            weiboElement.innerHTML = weiboHTML;
+            weiboFeed.appendChild(weiboElement);
         }
         
-        // 渲染微博列表
-        function renderWeiboFeed() {
-            const weiboFeed = document.getElementById('weibo-feed');
-            const weibos = generateWeiboList();
-            
-            weiboFeed.innerHTML = '';
-            weibos.forEach(weibo => {
-                weiboFeed.innerHTML += createWeiboHTML(weibo);
-            });
-            
-            // 添加交互事件
-            document.querySelectorAll('.action-item').forEach(item => {
-                item.addEventListener('click', handleAction);
-            });
-            
-            document.querySelectorAll('.hashtag').forEach(tag => {
-                tag.addEventListener('click', () => {
-                    logAction('hashtag_click', tag.textContent);
-                });
-            });
-        }
-        
-        // 处理用户交互
-        function handleAction(event) {
-            const actionType = event.currentTarget.dataset.action;
-            const weiboId = event.currentTarget.dataset.id;
-            
-            // 记录用户行为
-            logAction(actionType, weiboId);
-            
-            // 视觉反馈
-            if (actionType === 'like') {
-                event.currentTarget.style.color = '#ff8200';
-                const countText = event.currentTarget.textContent;
-                const count = parseInt(countText.replace(/[^0-9]/g, '')) || 0;
-                event.currentTarget.textContent = `点赞 ${count + 1}`;
-            } else if (actionType === 'comment') {
-                const comment = prompt('请输入您的评论:');
-                if (comment && comment.trim()) {
-                    logAction('comment_content', weiboId, comment);
-                    alert('评论已提交！');
-                }
-            } else if (actionType === 'forward') {
-                const forward = prompt('转发微博，您想说点什么?');
-                if (forward !== null) {
-                    logAction('forward_content', weiboId, forward || '转发微博');
-                    event.currentTarget.style.color = '#ff8200';
-                    const countText = event.currentTarget.textContent;
-                    const count = parseInt(countText.replace(/[^0-9]/g, '')) || 0;
-                    event.currentTarget.textContent = `转发 ${count + 1}`;
-                }
+        // 洗牌数组
+        function shuffleArray(array) {
+            const newArray = [...array]; // 创建副本
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
             }
+            return newArray;
         }
         
-        // 记录用户行为
-        function logAction(action, targetId, content = null) {
-            const actionData = {
-                userId: userId,
-                source: sourceType,
-                mistake: mistakeCondition,
-                action,
-                targetId,
-                content,
-                timestamp: new Date().toISOString()
-            };
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            loadExperimentGroup();
             
-            userActions.push(actionData);
-            
-            // 保存到localStorage
-            localStorage.setItem('weiboExperimentActions', JSON.stringify(userActions));
-            console.log('用户行为记录:', actionData);
-        }
-        
-        // 返回问卷函数
-        function returnToSurvey() {
-            // 将收集的所有数据整合
-            const allData = {
-                userId: userId,
-                source: sourceType,
-                mistake: mistakeCondition,
-                actions: userActions,
-                startTime: startTime.toISOString(),
-                endTime: new Date().toISOString()
-            };
-            
-            // 保存完整数据到localStorage
-            localStorage.setItem('weiboExperimentComplete', JSON.stringify(allData));
-            
-            // 构建返回URL
-            // let returnUrl = urlParams.get('returnUrl');
-            let returnUrl = 'https://github.com/vicshi94/';
-            
-            // if (returnUrl) {
-            //     // 添加数据摘要作为URL参数返回给Credemo
-            //     returnUrl += `&completed=true&source=${sourceType}&mistake=${mistakeCondition}`;
-            //     returnUrl += `&actions=${userActions.length}`;
-            //     returnUrl += `&duration=${Math.round((new Date() - startTime) / 1000)}`;
-                
-            //     // 跳转回问卷
-            //     window.location.href = returnUrl;
-            if (returnUrl) {
+            // 返回按钮事件
+            document.getElementById('return-button').addEventListener('click', function() {
+                // 使用URL参数中的returnUrl或默认返回问卷平台
+                const returnUrl = urlParams.get('returnUrl') || 'https://问卷平台地址';
                 window.location.href = returnUrl;
-            } else {
-                alert("实验完成！您的行为数据已记录。");
-                console.log("完整数据:", allData);
-            }
-        }
-        
-        // 页面加载时初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            renderWeiboFeed();
-            
-            // 添加返回按钮事件
-            document.getElementById('return-button').addEventListener('click', returnToSurvey);
-            
-            // 记录页面加载事件
-            logAction('page_loaded', 'feed');
+            });
         });
     </script>
 </body>
